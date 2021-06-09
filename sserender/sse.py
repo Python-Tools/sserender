@@ -1,6 +1,6 @@
 import io
 import re
-from typing import Optional, Union, Dict
+from typing import Optional, Union
 from mypy_extensions import TypedDict
 
 
@@ -22,16 +22,21 @@ class SSE:
     retry: Optional[int]
     comment: Optional[str]
 
+    __slots__ = ["ID", "event", "data", "retry", "comment"]
+
     def __init__(self, ID: Optional[str] = None,
                  event: Optional[str] = None,
                  data: Optional[str] = None,
                  comment: Optional[str] = None,
                  retry: Optional[int] = None) -> None:
-        self.ID = ID
-        self.event = event
-        self.data = data
-        self.retry = retry
-        self.comment = comment
+        if any([ID, event, data, comment, retry]):
+            self.ID = ID
+            self.event = event
+            self.data = data
+            self.retry = retry
+            self.comment = comment
+        else:
+            raise ValueError("at least one args")
 
     def render(self, with_encode: bool = False) -> Union[str, bytes]:
         buffer = io.StringIO()
