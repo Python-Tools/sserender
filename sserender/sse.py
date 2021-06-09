@@ -33,7 +33,7 @@ class SSE:
         self.retry = retry
         self.comment = comment
 
-    def render(self, with_encode: bool = True) -> Union[str, bytes]:
+    def render(self, with_encode: bool = False) -> Union[str, bytes]:
         buffer = io.StringIO()
         if self.comment is not None:
             for chunk in self._LINE_SEP_EXPR.split(self.comment):
@@ -64,7 +64,7 @@ class SSE:
         return result
 
     @classmethod
-    def from_content(clz, content: Union[str, bytes], strict: bool = True) -> "SSE":
+    def from_content(clz, content: Union[str, bytes], strict: bool = False) -> "SSE":
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         if strict:
