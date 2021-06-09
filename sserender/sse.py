@@ -29,16 +29,41 @@ class SSE:
                  data: Optional[str] = None,
                  comment: Optional[str] = None,
                  retry: Optional[int] = None) -> None:
-        if any([ID, event, data, comment, retry]):
+        """构造sse消息.
+
+        除了retry外至少要有1个参数.
+
+        Args:
+            ID (Optional[str], optional): 消息id. Defaults to None.
+            event (Optional[str], optional): 消息事件. Defaults to None.
+            data (Optional[str], optional): 消息数据. Defaults to None.
+            comment (Optional[str], optional): 消息注释. Defaults to None.
+            retry (Optional[int], optional): 重连间隔时间,单位ms. Defaults to None.
+
+        Raises:
+            TypeError: [description]
+            ValueError: [description]
+        """
+        if any([ID, event, data, comment]):
             self.ID = ID
             self.event = event
             self.data = data
             self.retry = retry
             self.comment = comment
+            if self.retry and not isinstance(self.retry, int):
+                raise TypeError("retry argument must be int")
         else:
-            raise ValueError("at least one args")
+            raise ValueError("at least one argument")
 
-    def render(self, with_encode: bool = False) -> Union[str, bytes]:
+    def render(self, *, with_encode: bool = False) -> Union[str, bytes]:
+        """渲染sse消息对象
+
+        Args:
+            with_encode (bool, optional): 是否编码. Defaults to False.
+
+        Returns:
+            Union[str, bytes]: with_encode为True则返回为bytes否则为str
+        """
         buffer = io.StringIO()
         if self.comment is not None:
             for chunk in self._LINE_SEP_EXPR.split(self.comment):
@@ -57,8 +82,6 @@ class SSE:
                 buffer.write(self._DEFAULT_SEPARATOR)
 
         if self.retry is not None:
-            if not isinstance(self.retry, int):
-                raise TypeError("retry argument must be int")
             buffer.write("retry: {}".format(self.retry))
             buffer.write(self._DEFAULT_SEPARATOR)
 
@@ -69,7 +92,19 @@ class SSE:
         return result
 
     @classmethod
-    def from_content(clz, content: Union[str, bytes], strict: bool = False) -> "SSE":
+    def from_content(clz, content: Union[str, bytes], *, strict: bool = False) -> "SSE":
+        """从字符串或者字节流中解析出sse消息.
+
+        Args:
+            content (Union[str, bytes]): 待解析的内容
+            strict (bool, optional): 严格模式,校验结尾是否为`\r\n\r\n`. Defaults to False.
+
+        Raises:
+            ValueError: not end with `\r\n\r\n`
+
+        Returns:
+            [SSE]: sse消息对象
+        """
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         if strict:
@@ -82,6 +117,7 @@ class SSE:
         retry = 0
         comment = ""
         lines = content.strip().split(clz._DEFAULT_SEPARATOR)
+        print(lines)
         for line in lines:
             if line.startswith(":"):
                 c = line[1:].strip() + "\n"

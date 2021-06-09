@@ -1,3 +1,6 @@
 {
-    "env": "venv"
+    "env": "venv",
+    "added_components": {
+        "cp_python_test//simplemodule_tests": "tests"
+    }
 }
