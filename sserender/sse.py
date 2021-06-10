@@ -137,9 +137,9 @@ class SSE:
         if event:
             args.update({"event": event})
         if data:
-            args.update({"data": data})
+            args.update({"data": data.strip()})
         if retry:
             args.update({"retry": retry})
         if comment:
-            args.update({"comment": comment})
+            args.update({"comment": comment.strip()})
         return clz(**args)
